@@ -11,7 +11,12 @@ module.exports = {
 	},
 	resolve: {
 		alias: {
-			reducers: path.join(__dirname, 'src', 'reducers')
+			actions: path.join(__dirname, 'src', 'actions'),
+			constants: path.join(__dirname, 'src', 'constants'),
+			components: path.join(__dirname, 'src', 'components'),
+			reducers: path.join(__dirname, 'src', 'reducers'),
+			selectors: path.join(__dirname, 'src', 'selectors'),
+			utils: path.join(__dirname, 'src', 'utils'),
 		},
 		extensions: ['.js', '.jsx']
 	},
