@@ -17,8 +17,10 @@ const App = () => {
 
 	const expressionTokens = useSelector(selectExpressionTokens);
 	const [data, setData] = useState([]);
+	const [error, setError] = useState('');
 
 	useEffect(() => {
+		setError('');
 		if (!expressionTokens.length) {
 			setData([]);
 		}
@@ -29,7 +31,7 @@ const App = () => {
 			return;
 		}
 		if (expressionTokens.filter(token => token === "(").length !== expressionTokens.filter(token => token === ")").length) {
-			alert("Error: unbalanced brackets");
+			setError("Error: Unbalanced brackets");
 			return;
 		}
 		const data = Array.from({length: rangeEnd - rangeStart + 1}, (_, i) => i + rangeStart)
@@ -39,22 +41,27 @@ const App = () => {
 			});
 
 		if (data.find(element => isNaN(element.y) || element.y === Infinity)) {
-			alert('Expression failed')
+			setError("Error: Expression is not valid");
 			return;
 		}
 		setData(data);
 	}
 
 	return (
-		<div
-			className="d-flex align-items-center justify-content-around flex-column flex-wrap flex-lg-row calculator-container">
-			<ExpressionCalculator/>
-			<div className="d-flex flex-column justify-content-around align-items-center m-3">
-				<Range/>
-				<button className="btn btn-lg mt-3 mt-lg-5 button-blue" onClick={() => calculate()}>Run Expression</button>
+		<>
+			<div
+				className="d-flex align-items-center justify-content-around flex-column flex-wrap flex-lg-row calculator-container">
+				<ExpressionCalculator/>
+				<div className="d-flex flex-column justify-content-around align-items-center m-3">
+					<Range/>
+					<button className="btn btn-lg mt-3 mt-lg-5 button-blue" onClick={() => calculate()}>Run Expression</button>
+				</div>
+				<Chart data={data}/>
 			</div>
-			<Chart data={data}/>
-		</div>
+			{
+				error && <div className="alert alert-danger error fixed-bottom" role="alert">{error}</div>
+			}
+		</>
 	);
 };
 
