@@ -1,0 +1,20 @@
+.range-container {
+	padding: 10px;
+	background-color: #2e2e2e;
+	border-radius: 10px;
+	width: 250px;
+	min-width: 250px;
+}
+
+.input-range {
+	background-color: #636363;
+	border-radius: 5px;
+	box-shadow: 0 5px 10px #444 inset;
+	border: 0;
+	color: white;
+}
+
+.input-range:focus {
+	background-color: #636363;
+	color: white;
+}
