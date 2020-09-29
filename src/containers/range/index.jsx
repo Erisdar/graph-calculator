@@ -1,9 +1,9 @@
 import { setEndOfRange, setStartOfRange } from "actions/index";
-import React, { memo } from 'react';
+import React, { memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectRange } from "selectors/range-selector";
 
-import './range.css';
+import "./range.css";
 
 export const Range = memo(() => {
 
@@ -13,6 +13,14 @@ export const Range = memo(() => {
 	const validateEmptyRange = (value, setRange) => {
 		if (value === "") {
 			dispatch(setRange(0));
+			return;
+		}
+		if (value > 1000) {
+			dispatch(setRange(1000));
+			return;
+		}
+		if (value < -1000) {
+			dispatch(setRange(-1000));
 		}
 	};
 
@@ -23,16 +31,16 @@ export const Range = memo(() => {
 				<label htmlFor="start-range-input" className="col-form-label">From</label>
 				<div className="col-8">
 					<input className="form-control input-range" type="number" id="start-range-input" value={rangeStart}
-						onChange={({target}) => dispatch(setStartOfRange(target.value))}
-						onBlur={({target}) => validateEmptyRange(target.value, setStartOfRange)}/>
+								 onChange={({target}) => dispatch(setStartOfRange(target.value))}
+								 onBlur={({target}) => validateEmptyRange(target.value, setStartOfRange)}/>
 				</div>
 			</div>
 			<div className="form-group d-flex flex-column align-items-center">
 				<label htmlFor="end-range-input" className="col-form-label">To</label>
 				<div className="col-8">
 					<input className="form-control input-range" type="number" id="end-range-input" value={rangeEnd}
-						onChange={({target}) => dispatch(setEndOfRange(target.value))}
-						onBlur={({target}) => validateEmptyRange(target.value, setEndOfRange)}/>
+								 onChange={({target}) => dispatch(setEndOfRange(target.value))}
+								 onBlur={({target}) => validateEmptyRange(target.value, setEndOfRange)}/>
 				</div>
 			</div>
 		</div>

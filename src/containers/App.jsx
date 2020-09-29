@@ -1,30 +1,47 @@
-import React, { memo, useState } from 'react';
+import { X_CHAR } from "constants/calculator.constants";
+import React, { memo, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { selectExpression } from "selectors/expression-selector";
+import { selectExpressionTokens } from "selectors/expression-tokens-selector";
 import { selectRange } from "selectors/range-selector";
 import { calculateExpression } from "utils/calc";
 
-import './app.css';
+import "./app.css";
 import { Chart } from "./chart";
 import { ExpressionCalculator } from "./expression-calculator";
 import { Range } from "./range";
 
 const App = () => {
 	const range = useSelector(selectRange);
-	const rangeStart = +range.rangeStart;
-	const rangeEnd = +range.rangeEnd;
+	const rangeStart = Math.min(range.rangeStart, range.rangeEnd);
+	const rangeEnd = Math.max(range.rangeStart, range.rangeEnd);
 
-	const expression = useSelector(selectExpression);
+	const expressionTokens = useSelector(selectExpressionTokens);
 	const [data, setData] = useState([]);
 
+	useEffect(() => {
+		if (!expressionTokens.length) {
+			setData([]);
+		}
+	}, [expressionTokens])
 
 	const calculate = () => {
+		if (!expressionTokens.length) {
+			return;
+		}
+		if (expressionTokens.filter(token => token === "(").length !== expressionTokens.filter(token => token === ")").length) {
+			alert("Error: unbalanced brackets");
+			return;
+		}
 		const data = Array.from({length: rangeEnd - rangeStart + 1}, (_, i) => i + rangeStart)
 			.map(x => {
-				const y = calculateExpression(expression.replaceAll('x', x));
+				const y = calculateExpression(expressionTokens.map(token => token === X_CHAR ? x : token));
 				return {label: x.toString(), x, y}
 			});
 
+		if (data.find(element => isNaN(element.y) || element.y === Infinity)) {
+			alert('Expression failed')
+			return;
+		}
 		setData(data);
 	}
 

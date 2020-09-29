@@ -27,6 +27,11 @@
 	box-shadow: 0 5px 10px #222;
 }
 
+.filtered-btn{
+	border-color: #ff8400;
+	border-width: 2px;
+}
+
 .main-calc-buttons .calc-btn {
 	background-color: #636363;
 }

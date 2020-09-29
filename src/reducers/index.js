@@ -1,11 +1,11 @@
-import expression from "reducers/expression";
+import expressionTokens from "reducers/expressionTokens";
 import { end, start } from "reducers/range";
-import { combineReducers } from 'redux';
+import { combineReducers } from "redux";
 
 export default combineReducers({
 	range: combineReducers({
 		start,
 		end,
 	}),
-	expression
+	expressionTokens,
 })

@@ -2,8 +2,8 @@ import React from "react";
 
 const style = {
 	display: "inline-block",
-	width: '100%',
-	textAlign: 'center',
+	width: "100%",
+	textAlign: "center",
 	color: "#808080",
 };
 
@@ -12,8 +12,7 @@ const rotateStyles = {
 	width: 35,
 	transformOrigin: "center",
 	marginTop: 50,
-	marginRight: 20
-
+	marginRight: 10
 }
 
 const AxisLabel = ({text, rotate}) => (

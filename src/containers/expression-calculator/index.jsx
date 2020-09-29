@@ -1,26 +1,61 @@
-import { changeExpression, clearExpression } from "actions/index";
-import { calcButtons, operators } from "constants/calculator.constants";
-import React, { memo } from 'react';
+import { addExpressionToken, clearExpressionTokens, removeLastExpressionToken } from "actions/index";
+import { calcButtons, operators, X_CHAR } from "constants/calculator.constants";
+import _ from "lodash";
+import React, { memo, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { selectExpression } from "selectors/expression-selector";
-
-import './expression-calculator.css';
+import { selectExpressionTokens } from "selectors/expression-tokens-selector";
+import "./expression-calculator.css";
 
 export const ExpressionCalculator = memo(() => {
 
 	const dispatch = useDispatch();
-	const expression = useSelector(selectExpression);
+	const expressionTokens = useSelector(selectExpressionTokens);
 
-	const addToExpression = (value) => {
-		const lastChar = expression.substr(expression.length - 1);
-		if (lastChar === 'x' && !isNaN(value) || (value === 'x' && !["", " ", "("].includes(lastChar))) {
+	const [expression, setExpression] = useState("");
+	const [filteredComponents, setFilteredComponents] = useState([..._.flatten(calcButtons), X_CHAR]);
+
+	useEffect(() => {
+		setExpression(expressionTokens.reduce((string, token) => {
+			const operator = operators.find(operator => operator.id === token);
+			return string + (operator ? operator.symbol : token);
+		}, ""));
+	}, [expressionTokens]);
+
+	//Filtering available buttons by last expression token
+	useEffect(() => {
+		const lastToken = expressionTokens[expressionTokens.length - 1];
+		let filterFunc;
+
+		if (!isNaN(lastToken) || lastToken === X_CHAR) {
+			filterFunc = expressionTokens.find(token => token === "(")
+				? (element) => !["(", "√", X_CHAR].includes(element)
+				: (element) => !["(", "√", ")", X_CHAR].includes(element)
+		} else {
+			switch (lastToken) {
+				case ")":
+					filterFunc = (element) => isNaN(element) && ![".", "(", X_CHAR, "√"].includes(element);
+					break;
+				default:
+					filterFunc = (element) => !isNaN(element) || ["√", "(", X_CHAR, ".", "(-)"].includes(element);
+			}
+		}
+
+		setFilteredComponents(_.chain(calcButtons)
+			.flatten()
+			.push(X_CHAR)
+			.filter(filterFunc)
+			.value());
+	}, [expressionTokens]);
+
+	const addToken = (value) => {
+		if (!filteredComponents.includes(value)) {
 			return;
 		}
-		if ((isNaN(lastChar) && lastChar !== 'x') && (isNaN(value) && !['√', '('].includes(value))) {
-			return;
-		}
-		const operator = operators.find(operator => operator.id === value);
-		dispatch(changeExpression(`${expression}${operator ? operator.symbol : value}`));
+		dispatch(addExpressionToken(value));
+	}
+
+	const clearTokens = () => {
+		dispatch(clearExpressionTokens());
 	}
 
 	return (
@@ -34,12 +69,15 @@ export const ExpressionCalculator = memo(() => {
 			<div className="d-flex justify-content-between w-100">
 				<div className="main-calc-buttons d-flex flex-column">
 					{
-						calcButtons.map(row => (
-							<div className="d-flex calc-btn-row">
+						calcButtons.map((row, index) => (
+							<div key={index} className="d-flex calc-btn-row">
 								{
-									row.map(number => (
-										<button className="calc-btn btn" onClick={() => addToExpression(number)}>{number}</button>
-									))
+									row.map((number, index) =>
+										<button key={index}
+											disabled={!filteredComponents.includes(number)}
+											className={`calc-btn btn ${filteredComponents.includes(number) && "filtered-btn"}`}
+											onClick={() => addToken(number)}>{number}</button>
+									)
 								}
 							</div>
 						))
@@ -47,13 +85,21 @@ export const ExpressionCalculator = memo(() => {
 				</div>
 				<div className="d-flex flex-column">
 					<div>
-						<button className="btn calc-btn button-blue" onClick={() => addToExpression('x')}>x (var)</button>
+						<button className={`btn calc-btn button-blue  ${filteredComponents.includes(X_CHAR) && "filtered-btn"}`}
+							disabled={!filteredComponents.includes(X_CHAR)}
+							onClick={() => addToken(X_CHAR)}>
+							{`${X_CHAR} (var)`}
+						</button>
 					</div>
 					<div>
-						<button className="btn calc-btn button-orange">AC</button>
+						<button className="btn calc-btn button-orange" onClick={clearTokens}>
+							AC
+						</button>
 					</div>
 					<div>
-						<button className="btn calc-btn button-orange" onClick={() => dispatch(clearExpression())}>DEL</button>
+						<button className="btn calc-btn button-orange" onClick={() => dispatch(removeLastExpressionToken())}>
+							DEL
+						</button>
 					</div>
 				</div>
 			</div>
